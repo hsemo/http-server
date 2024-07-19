@@ -1,8 +1,5 @@
 const net = require("net");
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.log("Logs from your program will appear here!");
-
 // Uncomment this to pass the first stage
 const server = net.createServer((socket) => {
     socket.setEncoding('utf-8');
@@ -14,8 +11,14 @@ const server = net.createServer((socket) => {
     socket.on('data', function handleRequest(data) {
         var reqTarget = data.split('\r\n')[0].split(' ')[1];
 
-        if(reqTarget === '/') {
-            socket.write("HTTP/1.1 200 OK\r\n\r\n");
+        if (reqTarget === '/'){
+            socket.write('HTTP/1.1 200 OK\r\n\r\n');
+
+        } else if (reqTarget.startsWith('/echo')) {
+            let echoText = reqTarget.split('/')[2];
+            let response = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoText.length}\r\n\r\n${echoText}`;
+
+            socket.write(response);
         } else {
             socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
         }
