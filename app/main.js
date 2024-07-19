@@ -1,4 +1,5 @@
 const net = require("net");
+const {parseHttpReq} = require('./utils.js');
 
 // Uncomment this to pass the first stage
 const server = net.createServer((socket) => {
@@ -9,7 +10,11 @@ const server = net.createServer((socket) => {
     });
 
     socket.on('data', function handleRequest(data) {
-        var reqTarget = data.split('\r\n')[0].split(' ')[1];
+        console.log(data);
+
+        var req = parseHttpReq(data);
+
+        var reqTarget = req.target;
 
         if (reqTarget === '/'){
             socket.write('HTTP/1.1 200 OK\r\n\r\n');
@@ -19,6 +24,12 @@ const server = net.createServer((socket) => {
             let response = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoText.length}\r\n\r\n${echoText}`;
 
             socket.write(response);
+        } else if (reqTarget.startsWith('/user-agent')) {
+            let userAgent = req.headers['user-agent'];
+            socket.write(
+                `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgent.length}\r\n\r\n${userAgent}`
+            );
+
         } else {
             socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
         }
