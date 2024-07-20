@@ -25,10 +25,7 @@ function parseHttpReq(reqData) {
 }
 
 function response() {
-    var res = Object.create(null);
-    res.status = Object.create(null);
-    res.headers = Object.create(null);
-    res.body = '';
+    var res = "HTTP/1.1 ";
 
     var statusCodes = {
         200: 'OK',
@@ -47,43 +44,24 @@ function response() {
 
     // ---------------------------> Public
     function status(code) {
-        res.status[code] = statusCodes[code];
+        res += `${code} ${statusCodes[code]}\r\n`;
         return api;
     }
 
     function header(key, value) {
-        res.headers[key] = value;
+        res += `${key}: ${value}\r\n`;
         return api;
     }
 
     function body(bd) {
-        res.body = bd;
+        res += '\r\n';
+        res += bd;
         return api;
     }
 
     function toString() {
-        var resStr = `HTTP/1.1 `;
-
-        resStr += getResStatus() + '\r\n';
-
-        for (let [key, value] of Object.entries(res.headers)) {
-            resStr += `${key}: ${value}\r\n`;
-        }
-
-        resStr += '\r\n';
-
-        resStr += res.body;
-
+        var resStr = res;
+        res = '';
         return resStr;
-    }
-
-    // ---------------------------> Private
-    function getResStatus() {
-        {
-            let code = Object.keys(res.status)[0];
-            let msg = res.status[code];
-            var status = `${code} ${msg}`;
-        }
-        return status;
     }
 }
