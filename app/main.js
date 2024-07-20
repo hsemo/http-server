@@ -1,6 +1,6 @@
 const net = require("net");
 const {existsSync, readFileSync} = require('node:fs');
-const {parseHttpReq} = require('./utils.js');
+const {parseHttpReq, response} = require('./utils.js');
 
 // Uncomment this to pass the first stage
 const server = net.createServer((socket) => {
@@ -20,31 +20,48 @@ const server = net.createServer((socket) => {
         var reqTarget = req.target;
 
         if (reqTarget === '/'){
-            socket.write('HTTP/1.1 200 OK\r\n\r\n');
+            socket.write(response().status(200).toString());
 
         } else if (reqTarget.startsWith('/echo')) {
             let echoText = reqTarget.split('/')[2];
-            let response = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoText.length}\r\n\r\n${echoText}`;
+            console.log('echoText: ', echoText);
+            socket.write(
+                response()
+                    .status(200)
+                    .header('Content-Type', 'text/plain')
+                    .header('Content-Length', echoText.length)
+                    .body(echoText)
+                    .toString()
+            );
 
-            socket.write(response);
         } else if (reqTarget.startsWith('/user-agent')) {
             let userAgent = req.headers['user-agent'];
             socket.write(
-                `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgent.length}\r\n\r\n${userAgent}`
+                response()
+                    .status(200)
+                    .header('Content-Type', 'text/plain')
+                    .header('Content-Length', userAgent.length)
+                    .body(userAgent)
+                    .toString()
             );
 
         } else if (reqTarget.startsWith('/files/')) {
             let absFilePath = reqTarget.replace('/files/', dir);
             console.log('absFilePath: ', absFilePath);
             if(!existsSync(absFilePath)){
-                socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+                socket.write(response().status(404).toString());
             }
             let fileContent = readFileSync(absFilePath, {encoding: 'utf-8'});
             socket.write(
-                `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${fileContent.length}\r\n\r\n${fileContent}`
+                response()
+                    .status(200)
+                    .header('Content-Type', 'application/octet-stream')
+                    .header('Content-Length', fileContent.length)
+                    .body(fileContent)
+                    .toString()
             );
         } else {
-            socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+            socket.write(response().status(404).toString());
         }
 
         socket.end();

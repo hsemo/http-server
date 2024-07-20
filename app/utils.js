@@ -1,4 +1,5 @@
 module.exports.parseHttpReq = parseHttpReq;
+module.exports.response = response;
 
 function parseHttpReq(reqData) {
     reqData = reqData.split('\r\n');
@@ -21,4 +22,68 @@ function parseHttpReq(reqData) {
     }
 
     return req;
+}
+
+function response() {
+    var res = Object.create(null);
+    res.status = Object.create(null);
+    res.headers = Object.create(null);
+    res.body = '';
+
+    var statusCodes = {
+        200: 'OK',
+        404: 'Not Found'
+    };
+
+    var api = Object.create(null);
+    Object.assign(api, {
+        status,
+        header,
+        body,
+        toString
+    });
+
+    return api;
+
+    // ---------------------------> Public
+    function status(code) {
+        res.status[code] = statusCodes[code];
+        return api;
+    }
+
+    function header(key, value) {
+        res.headers[key] = value;
+        return api;
+    }
+
+    function body(bd) {
+        res.body = bd;
+        return api;
+    }
+
+    function toString() {
+        var resStr = `HTTP/1.1 `;
+
+        resStr += getResStatus() + '\r\n';
+
+        for (let [key, value] of Object.entries(res.headers)) {
+            resStr += `${key}: ${value}\r\n`;
+        }
+
+        resStr += '\r\n';
+
+        resStr += res.body;
+
+        return resStr;
+    }
+
+    // ---------------------------> Private
+    function getResStatus() {
+        {
+            let code = Object.keys(res.status)[0];
+            let msg = res.status[code];
+            var status = `${code} ${msg}`;
+        }
+        return status;
+    }
 }
