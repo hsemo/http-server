@@ -1,4 +1,5 @@
 const net = require("net");
+const {existsSync, readFileSync} = require('node:fs');
 const {parseHttpReq} = require('./utils.js');
 
 // Uncomment this to pass the first stage
@@ -9,6 +10,8 @@ const server = net.createServer((socket) => {
         socket.end();
     });
 
+    var dir = process.argv[process.argv.indexOf('--directory') + 1];
+    dir += (dir.endsWith('/')) ? '' : '/';
     socket.on('data', function handleRequest(data) {
         console.log(data);
 
@@ -30,6 +33,16 @@ const server = net.createServer((socket) => {
                 `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgent.length}\r\n\r\n${userAgent}`
             );
 
+        } else if (reqTarget.startsWith('/files/')) {
+            let absFilePath = reqTarget.replace('/files/', dir);
+            console.log('absFilePath: ', absFilePath);
+            if(!existsSync(absFilePath)){
+                socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+            }
+            let fileContent = readFileSync(absFilePath, {encoding: 'utf-8'});
+            socket.write(
+                `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${fileContent.length}\r\n\r\n${fileContent}`
+            );
         } else {
             socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
         }
