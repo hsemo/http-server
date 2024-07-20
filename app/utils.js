@@ -32,6 +32,8 @@ function response() {
         404: 'Not Found'
     };
 
+    var hasBody = false;
+
     var api = Object.create(null);
     Object.assign(api, {
         status,
@@ -56,12 +58,17 @@ function response() {
     function body(bd) {
         res += '\r\n';
         res += bd;
+        hasBody = true;
         return api;
     }
 
     function toString() {
         var resStr = res;
+        resStr += hasBody ? '' : '\r\n';
+
+        hasBody = false;
         res = '';
+
         return resStr;
     }
 }
