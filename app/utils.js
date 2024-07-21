@@ -21,6 +21,9 @@ function parseHttpReq(reqData) {
         req.headers[headerKey] = headerValue;
     }
 
+    req.body = reqData[reqData.length - 1];
+
+    console.log('parsed request: ', req);
     return req;
 }
 
@@ -29,7 +32,8 @@ function response() {
 
     var statusCodes = {
         200: 'OK',
-        404: 'Not Found'
+        404: 'Not Found',
+        201: 'Created'
     };
 
     var hasBody = false;

@@ -1,5 +1,5 @@
 const net = require("net");
-const {existsSync, readFileSync} = require('node:fs');
+const {existsSync, readFileSync, writeFileSync} = require('node:fs');
 const {parseHttpReq, response} = require('./utils.js');
 
 // Uncomment this to pass the first stage
@@ -46,7 +46,7 @@ const server = net.createServer((socket) => {
                     .toString()
             );
 
-        } else if (reqTarget.startsWith('/files/')) {
+        } else if (req.method == 'get' && reqTarget.startsWith('/files/')) {
             let absFilePath = reqTarget.replace('/files/', dir);
             console.log('absFilePath: ', absFilePath);
             if(!existsSync(absFilePath)){
@@ -63,6 +63,19 @@ const server = net.createServer((socket) => {
                     .body(fileContent)
                     .toString()
             );
+
+        } else if (req.method.toLowerCase() == 'post' && reqTarget.startsWith('/files/')) {
+            let absFilePath = reqTarget.replace('/files/', dir);
+            console.log('absFilePath: ', absFilePath);
+
+            writeFileSync(absFilePath, req.body);
+
+            socket.write(
+                response()
+                    .status(201)
+                    .toString()
+            );
+
         } else {
             socket.write(response().status(404).toString());
         }
