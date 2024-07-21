@@ -46,7 +46,7 @@ const server = net.createServer((socket) => {
                     .toString()
             );
 
-        } else if (req.method == 'get' && reqTarget.startsWith('/files/')) {
+        } else if (req.method.toLowerCase() == 'get' && reqTarget.startsWith('/files/')) {
             let absFilePath = reqTarget.replace('/files/', dir);
             console.log('absFilePath: ', absFilePath);
             if(!existsSync(absFilePath)){
