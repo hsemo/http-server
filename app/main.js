@@ -80,7 +80,7 @@ const server = net.createServer((socket) => {
         } else if (reqTarget.startsWith('/echo') && req.headers['accept-encoding']) {
             let res = response().status(200);
 
-            if(req.headers['accept-encoding'] === 'gzip'){
+            if(req.headers['accept-encoding'].includes('gzip')){
                 res.header('Content-Encoding', 'gzip');
             }
 
