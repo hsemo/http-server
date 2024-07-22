@@ -23,7 +23,7 @@ const server = net.createServer((socket) => {
         if (reqTarget === '/'){
             socket.write(response().status(200).toString());
 
-        } else if (reqTarget.startsWith('/echo')) {
+        } else if (reqTarget.startsWith('/echo') && !req.headers['accept-encoding']) {
             let echoText = reqTarget.split('/')[2];
             console.log('echoText: ', echoText);
             socket.write(
@@ -73,6 +73,20 @@ const server = net.createServer((socket) => {
             socket.write(
                 response()
                     .status(201)
+                    .toString()
+            );
+
+
+        } else if (reqTarget.startsWith('/echo') && req.headers['accept-encoding']) {
+            let res = response().status(200);
+
+            if(req.headers['accept-encoding'] === 'gzip'){
+                res.header('Content-Encoding', 'gzip');
+            }
+
+            socket.write(
+                    res
+                    .header('Content-Type', 'text/plain')
                     .toString()
             );
 
