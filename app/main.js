@@ -1,4 +1,5 @@
 const net = require("net");
+const zlib = require("zlib");
 const {existsSync, readFileSync, writeFileSync} = require('node:fs');
 const {parseHttpReq, response} = require('./utils.js');
 
@@ -78,17 +79,23 @@ const server = net.createServer((socket) => {
 
 
         } else if (reqTarget.startsWith('/echo') && req.headers['accept-encoding']) {
-            let res = response().status(200);
+            let res = response().status(200).header('Content-Type', 'text/plain');
 
             if(req.headers['accept-encoding'].includes('gzip')){
+                let data = req.target.split('/')[2];
+                let compressedStr = zlib.gzipSync(data);
                 res.header('Content-Encoding', 'gzip');
+                res.header('Content-Length', compressedStr.length);
+                socket.write(res.toString());
+                socket.write(compressedStr);
+            } else {
+
+                socket.write(
+                    res
+                        .toString()
+                );
             }
 
-            socket.write(
-                    res
-                    .header('Content-Type', 'text/plain')
-                    .toString()
-            );
 
         } else {
             socket.write(response().status(404).toString());

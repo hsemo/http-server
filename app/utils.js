@@ -27,6 +27,7 @@ function parseHttpReq(reqData) {
     return req;
 }
 
+// TODO: make response fucntion able to store binary data
 function response() {
     var res = "HTTP/1.1 ";
 
